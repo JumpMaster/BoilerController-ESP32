@@ -11,8 +11,16 @@ void setBoiler(bool state)
     digitalWrite(RELAY_PIN, state);
     publishboilerActive(state);
     boilerActive = state;
+
     if (state)
+    {
         boilerAutoOffTime = millis() + maxBoilerRuntime;
+    }
+    else
+    {
+        boilerAutoOffTime = 0;   
+    }
+    
     Log.printf("Boiler switched %s\n", boilerActive ?  "on" : "off");
 }
 
@@ -82,7 +90,7 @@ void checkDeviceConnectionState()
         nextboilerActivePublish = currentMillis + boilerActivePublishFrequency;
     }
 
-    if (boilerActive && currentMillis > boilerAutoOffTime)
+    if (boilerAutoOffTime != 0 && boilerActive && currentMillis > boilerAutoOffTime)
     {
         setBoiler(false);
         Log.println("Boiler switched off due to exceeding max runtime");

@@ -24,26 +24,35 @@ public:
         _appName = appName;
         _syslogServer = syslogServer;
         _syslogPort = sysLogPort;
-        Serial.begin(9600);
+        enableSyslog();
+        enableLogging();
     }
 
-    void enableSerial(bool enable) { _enableSerial = enable; };
-    void enableSyslog(bool enable) { _enableSyslog = enable; };
+    void enableLogging()
+    {
+        Serial.begin(115200);
+        enableSerial();
+    }
+
+    void enableSerial() { _serialEnabled = true; };
+    void enableSyslog() { _syslogEnabled = true; };
+    void disableSerial() { _serialEnabled = false; };
+    void disableSyslog() { _syslogEnabled = false; };
 
     size_t write(byte a)
     {
-        if (_enableSyslog)
+        if (_syslogEnabled)
             return syslogwrite(a, _severity);
 
-        if (_enableSerial)
+        if (_serialEnabled)
             return Serial.write(a);
 
         return 1;
     };
 
 private:
-    bool _enableSerial = true;
-    bool _enableSyslog = true;
+    bool _serialEnabled = false;
+    bool _syslogEnabled = false;
     const uint8_t _defaultSeverity = 14;
     uint8_t _severity = _defaultSeverity;
     uint16_t _syslogPort = 514;
